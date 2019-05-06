@@ -1,0 +1,3 @@
+com\staho\batchjob\application\BatchJobApplication.class
+com\staho\batchjob\entity\ClientRepository.class
+com\staho\batchjob\entity\Client.class
