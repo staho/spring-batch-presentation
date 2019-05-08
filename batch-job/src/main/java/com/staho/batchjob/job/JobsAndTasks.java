@@ -10,10 +10,13 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.batch.item.support.CompositeItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableBatchProcessing
@@ -30,11 +33,20 @@ public class JobsAndTasks {
                          @Qualifier("clientProcessor") ItemProcessor<Client, Client> processor,
                          @Qualifier("clientEnhancer") ItemProcessor<Client, Client> enhancer,
                          ItemWriter<Client> writer) {
+
+        CompositeItemProcessor<Client, Client> processAndEnhance = new CompositeItemProcessor<>();
+
+        processAndEnhance.setDelegates(Arrays.asList(
+                processor,
+                enhancer
+        ));
+
+
+
         return steps.get("step1")
                 .<Client, Client> chunk(2)
                 .reader(reader)
-                .processor(processor)
-                .processor(enhancer)
+                .processor(processAndEnhance)
                 .writer(writer)
                 .faultTolerant()
                 .retryLimit(5)
